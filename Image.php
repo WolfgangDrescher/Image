@@ -21,6 +21,11 @@ class Image {
 	private $img = null; // Stage image where all manipulations will be set to
 	private $data = array(); // Array with informations about the file
 	
+	// Returns new self as an object to enable method chaining in one line
+	public static function init($file) {
+		return new self($file);
+	}
+	
 	// Checks filename and prepares image stage for manipulations
 	public function __construct($file) {
 		try {
