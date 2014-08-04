@@ -8,8 +8,13 @@ This class allows you to manipulate (e.g. resizing and rotating for thumbnails) 
 ...
 */
 
+class ImageException extends Exception {}
+
 class Image {
 	
+	public static $throwExceptions = true;
+	
+	private $error = false;
 	private $file = null;
 	private $img = null;
 	private $data = array();
@@ -21,10 +26,13 @@ class Image {
 				$this->file = $file;
 				$this->loadImage();
 			} else {
-				throw new Exception('File does not exist.');
+				throw new ImageException('File `' . $file . '` does not exist.');
 			}
-		} catch (Exception $e) {
-			echo $e->getMessage();
+		} catch (ImageException $e) {
+			$this->error = true;
+			if(self::$throwExceptions === true) {
+				echo '<div class="alert alert-danger"><span class="glyphicon glyphicon-warning-sign fa fa-bug fa-spin"></span> '.htmlentities($e->getMessage()).'</div>';
+			}
 		}
 	}
 	
@@ -35,9 +43,11 @@ class Image {
 			}
 			$this->img = null;
 			unset($this->img);
-			$this->tmp = null;
-			unset($this->tmp);
 		}
+	}
+	
+	public function isError() {
+		return $this->error === false ? false : true;
 	}
 	
 	public function loadImage() {
@@ -56,17 +66,17 @@ class Image {
 			ini_set('memory_limit', '128M');
 			$this->img = $icf($this->file);
 		} else {
-			throw new Exception('File is not an Image.');
+			throw new ImageException('File `' . $this->file . '` is not an image.');
 		}
 		return $this;
 	}
 	
 	public function getWidth() {
-		return imagesx($this->img);
+		return $this->isError() ? false : imagesx($this->img);
 	}
 	
 	public function getHeight() {
-		return imagesy($this->img);
+		return $this->isError() ? false : imagesy($this->img);
 	}
 	
 	public function outputJPEG() {
@@ -74,18 +84,21 @@ class Image {
 	}
 	
 	public function outputJPG($quality = 100) {
+		if($this->isError()) return false;
 		header('Content-Type: image/jpeg');
 		@imagejpeg($this->img, null, $quality);
 		return $this;
 	}
 	
 	public function outputPNG($compression = 0) {
+		if($this->isError()) return false;
 		header('Content-Type: image/png');
 		@imagepng($this->img, null, $compression);
 		return $this;
 	}
 	
 	public function outputGIF() {
+		if($this->isError()) return false;
 		header('Content-Type: image/gif');
 		@imagegif($this->img);
 		return $this;
@@ -96,24 +109,28 @@ class Image {
 	}
 	
 	public function saveJPG($path, $quality = 100) {
+		if($this->isError()) return false;
 		@imagejpeg($this->img, $path, $quality);
 		chmod($path, $this->chmod);
 		return $this;
 	}
 	
 	public function savePNG($path, $compression = 0) {
+		if($this->isError()) return false;
 		@imagepng($this->img, $path, $compression);
 		chmod($path, $this->chmod);
 		return $this;
 	}
 	
 	public function saveGIF($path) {
+		if($this->isError()) return false;
 		@imagegif($this->img, $path);
 		chmod($path, $this->chmod);
 		return $this;
 	}
 	
 	private function resize($w, $h, $tmpX, $tmpY, $tmpW, $tmpH, $bg = array()) {
+		if($this->isError()) return false;
 		$tmp = imagecreatetruecolor($w, $h);
 		if(!empty($bg)) imagefill($tmp, 0, 0, imagecolorallocate($tmp, $bg[0], $bg[1], $bg[2]));
 		imagecopyresampled($tmp, $this->img, $tmpX, $tmpY, 0, 0, $tmpW, $tmpH, $this->getWidth(), $this->getHeight());
@@ -122,69 +139,71 @@ class Image {
 	}
 	
 	public function resizeDeform($width, $height) {
+		if($this->isError()) return false;
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function resizeFill($width, $height) {
+		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
 		$cHeight = $this->getHeight() / $height;
 		$c = ($cHeight < $cWidth)? $cHeight : $cWidth;
 		$tmpWidth = $this->getWidth() / $c;
 		$tmpHeight = $this->getHeight() / $c;
-		$this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight);
-		return $this;
+		return $this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight);
 	}
 	
 	public function resizeFit($width, $height, $bg = array(0, 0, 0)) {
+		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
 		$cHeight = $this->getHeight() / $height;
 		$c = ($cHeight > $cWidth)? $cHeight : $cWidth;
 		$tmpWidth = $this->getWidth() / $c;
 		$tmpHeight = $this->getHeight() / $c;
-		$this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight, $bg);
-		return $this;
+		return $this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight, $bg);
 	}
 	
 	public function resizeWidth($width) {
+		if($this->isError()) return false;
 		$height = $width * $this->getHeight() / $this->getWidth();
-		$this->resize($width, $height, 0, 0, $width, $height);
-		return $this;
+		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function resizeHeight($height) {
+		if($this->isError()) return false;
 		$width = $height * $this->getWidth() / $this->getHeight();
-		$this->resize($width, $height, 0, 0, $width, $height);
-		return $this;
+		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function resizeMax($width, $height) {
+		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
 		$cHeight = $this->getHeight() / $height;
 		$c = ($cHeight > $cWidth)? $cHeight : $cWidth;
 		$width = $this->getWidth() / $c;
 		$height = $this->getHeight() / $c;
-		$this->resize($width, $height, 0, 0, $width, $height);
-		return $this;
+		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function resizeLongEdge($length) {
+		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $length;
 		$cHeight = $this->getHeight() / $length;
 		$c = ($this->getWidth() > $this->getHeight())? $cWidth : $cHeight;
 		$width = $this->getWidth() / $c;
 		$height = $this->getHeight() / $c;
-		$this->resize($width, $height, 0, 0, $width, $height);
-		return $this;
+		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function resizeScale($percent) {
+		if($this->isError()) return false;
 		$width = $this->getWidth() * $percent / 100;
 		$height = $this->getHeight() * $percent / 100;
-		$this->resize($width, $height, 0, 0, $width, $height);
-		return $this;
+		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
 	public function rotate($degrees, $bg = array(0,0,0)) {
+		if($this->isError()) return false;
 		$degrees = $degrees * (-1);
 		$this->img = imagerotate($this->img, $degrees, imagecolorallocate($this->img, $bg[0], $bg[1], $bg[2]));
 		return $this;
