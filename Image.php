@@ -13,12 +13,12 @@ class ImageException extends Exception {}
 class Image {
 	
 	public static $throwExceptions = true;
+	public static $chmod = 0755;
 	
 	private $error = false;
 	private $file = null;
 	private $img = null;
 	private $data = array();
-	private $chmod = 0775;
 	
 	public function __construct($file) {
 		try {
@@ -111,21 +111,21 @@ class Image {
 	public function saveJPG($path, $quality = 100) {
 		if($this->isError()) return false;
 		@imagejpeg($this->img, $path, $quality);
-		chmod($path, $this->chmod);
+		chmod($path, self::$chmod);
 		return $this;
 	}
 	
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
 		@imagepng($this->img, $path, $compression);
-		chmod($path, $this->chmod);
+		chmod($path, self::$chmod);
 		return $this;
 	}
 	
 	public function saveGIF($path) {
 		if($this->isError()) return false;
 		@imagegif($this->img, $path);
-		chmod($path, $this->chmod);
+		chmod($path, self::$chmod);
 		return $this;
 	}
 	
