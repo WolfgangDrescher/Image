@@ -93,6 +93,7 @@ class Image {
 	public function outputPNG($compression = 0) {
 		if($this->isError()) return false;
 		header('Content-Type: image/png');
+		imagesavealpha($this->img, true);
 		@imagepng($this->img, null, $compression);
 		return $this;
 	}
@@ -117,6 +118,7 @@ class Image {
 	
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
+		imagesavealpha($this->img, true);
 		@imagepng($this->img, $path, $compression);
 		chmod($path, self::$chmod);
 		return $this;
@@ -132,7 +134,12 @@ class Image {
 	private function resize($w, $h, $tmpX, $tmpY, $tmpW, $tmpH, $bg = array()) {
 		if($this->isError()) return false;
 		$tmp = imagecreatetruecolor($w, $h);
-		if(!empty($bg)) imagefill($tmp, 0, 0, imagecolorallocate($tmp, $bg[0], $bg[1], $bg[2]));
+		$bg = array_values($bg);
+		if(count($bg) >= 3) {
+			$num = isset($bg[3]) ? ($bg[3] > 1 ? $bg[3] / 100 : $bg[3]) : 1;
+			$alpha = max(0, min(127, intval(floatval($num) * (-127) + 127)));
+			imagefill($tmp, 0, 0, imagecolorallocatealpha($tmp, $bg[0], $bg[1], $bg[2], $alpha));
+		}
 		imagecopyresampled($tmp, $this->img, $tmpX, $tmpY, 0, 0, $tmpW, $tmpH, $this->getWidth(), $this->getHeight());
 		$this->img = $tmp;
 		return $this;
