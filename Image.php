@@ -54,6 +54,11 @@ class Image {
 		}
 	}
 	
+	// Enables public access to the data detected with getimagesize()
+	public function getData($key = null) {
+		return isset($this->data[$key]) ? $this->data[$key] : $this->data;
+	}
+	
 	// Checks if an error occurred
 	public function isError() {
 		return $this->error === false ? false : true;
