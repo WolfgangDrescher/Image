@@ -12,14 +12,16 @@ class ImageException extends Exception {}
 
 class Image {
 	
+	// Public variables for class settings
 	public static $throwExceptions = true;
 	public static $chmod = 0755;
 	
-	private $error = false;
-	private $file = null;
-	private $img = null;
-	private $data = array();
+	private $error = false; // Boolean value whether an error occurred or not
+	private $file = null; // Path to the image file
+	private $img = null; // Stage image where all manipulations will be set to
+	private $data = array(); // Array with informations about the file
 	
+	// Checks filename and prepares image stage for manipulations
 	public function __construct($file) {
 		try {
 			if(file_exists($file) AND is_file($file)) {
@@ -36,6 +38,7 @@ class Image {
 		}
 	}
 	
+	// Frees all image variables
 	public function __destruct() {
 		if(!$this->isError()) {
 			if(is_resource($this->img)) {
@@ -46,10 +49,12 @@ class Image {
 		}
 	}
 	
+	// Checks if an error occurred
 	public function isError() {
 		return $this->error === false ? false : true;
 	}
 	
+	// Sets the current stage image to the passed filename
 	public function loadImage() {
 		if($gis = getimagesize($this->file)) {
 			$this->data['width'] = $gis[0];
@@ -71,18 +76,22 @@ class Image {
 		return $this;
 	}
 	
+	// Returns the width of the current stage image
 	public function getWidth() {
 		return $this->isError() ? false : imagesx($this->img);
 	}
 	
+	// Returns the height of the current stage image
 	public function getHeight() {
 		return $this->isError() ? false : imagesy($this->img);
 	}
 	
+	// Alias for self::outputJPG()
 	public function outputJPEG() {
 		return call_user_func_array('self::outputJPG', func_get_args());
 	}
 	
+	// Outputs the stage image as JPG
 	public function outputJPG($quality = 100) {
 		if($this->isError()) return false;
 		header('Content-Type: image/jpeg');
@@ -90,6 +99,7 @@ class Image {
 		return $this;
 	}
 	
+	// Outputs the stage image as PNG
 	public function outputPNG($compression = 0) {
 		if($this->isError()) return false;
 		header('Content-Type: image/png');
@@ -98,6 +108,7 @@ class Image {
 		return $this;
 	}
 	
+	// Outputs the stage image as GIF
 	public function outputGIF() {
 		if($this->isError()) return false;
 		header('Content-Type: image/gif');
@@ -105,10 +116,12 @@ class Image {
 		return $this;
 	}
 	
+	// Alias for self::saveJPG()
 	public function saveJPEG() {
 		return call_user_func_array('self::saveJPG', func_get_args());
 	}
 	
+	// Saves the stage image as JPG file
 	public function saveJPG($path, $quality = 100) {
 		if($this->isError()) return false;
 		@imagejpeg($this->img, $path, $quality);
@@ -116,6 +129,7 @@ class Image {
 		return $this;
 	}
 	
+	// Saves the stage image as PNG file
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
 		imagesavealpha($this->img, true);
@@ -124,6 +138,7 @@ class Image {
 		return $this;
 	}
 	
+	// Saves the stage image as GIF file
 	public function saveGIF($path) {
 		if($this->isError()) return false;
 		@imagegif($this->img, $path);
@@ -131,6 +146,7 @@ class Image {
 		return $this;
 	}
 	
+	// Resizes stage image to the passed size arguments
 	private function resize($w, $h, $tmpX, $tmpY, $tmpW, $tmpH, $bg = array()) {
 		if($this->isError()) return false;
 		$tmp = imagecreatetruecolor($w, $h);
@@ -145,11 +161,13 @@ class Image {
 		return $this;
 	}
 	
+	// Resizes an image without keeping the aspect ratio (will skew)
 	public function resizeDeform($width, $height) {
 		if($this->isError()) return false;
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Resized image will fill the full sizes passed as arguments (image will be croped)
 	public function resizeFill($width, $height) {
 		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
@@ -160,6 +178,7 @@ class Image {
 		return $this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight);
 	}
 	
+	// Resized image will fit into the sizes passed as arguments (image will not be croped, but a background will be seen)
 	public function resizeFit($width, $height, $bg = array(0, 0, 0)) {
 		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
@@ -170,18 +189,21 @@ class Image {
 		return $this->resize($width, $height, ($width-$tmpWidth)/2, ($height-$tmpHeight)/2, $tmpWidth, $tmpHeight, $bg);
 	}
 	
+	// Resizes stage image to the passed width and calculates the correct height
 	public function resizeWidth($width) {
 		if($this->isError()) return false;
 		$height = $width * $this->getHeight() / $this->getWidth();
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Resizes stage image to the passed height and calculates the correct width
 	public function resizeHeight($height) {
 		if($this->isError()) return false;
 		$width = $height * $this->getWidth() / $this->getHeight();
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Resizes stage image to the passed maximum width and height
 	public function resizeMax($width, $height) {
 		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $width;
@@ -192,6 +214,7 @@ class Image {
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Rezies long edge of stage image to the passed value and calculates size of the other edge
 	public function resizeLongEdge($length) {
 		if($this->isError()) return false;
 		$cWidth = $this->getWidth() / $length;
@@ -202,6 +225,7 @@ class Image {
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Resizes stage image by the passed percent value
 	public function resizeScale($percent) {
 		if($this->isError()) return false;
 		$width = $this->getWidth() * $percent / 100;
@@ -209,6 +233,9 @@ class Image {
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
+	// Rotates stage image by the passed degree value
+	// The stage image itself will keep the size after rotating but a background will append
+	// which means the image sizes will grow to keep its rectangular shape 
 	public function rotate($degrees, $bg = array(0,0,0)) {
 		if($this->isError()) return false;
 		$degrees = $degrees * (-1);
@@ -216,26 +243,32 @@ class Image {
 		return $this;
 	}
 	
+	// Rotates stage image by 90 degree clockwise
 	public function rotateClockwise() {
 		return $this->rotate(90);
 	}
 	
+	// Rotates stage image by 90 degree counter clockwise
 	public function rotateCounterClockwise() {
 		return $this->rotate(-90);
 	}
 	
+	// Alias for self::rotateClockwise()
 	public function rotateRight() {
 		return $this->rotateClockwise();
 	}
 	
+	// Alias for self::rotateCounterclockwise()
 	public function rotateLeft() {
 		return $this->rotateCounterclockwise();
 	}
 	
+	// Alias for self::rotateClockwise()
 	public function rotateCw() {
 		return $this->rotateClockwise();
 	}
 	
+	// Alias for self::rotateCounterclockwise()
 	public function rotateCCw() {
 		return $this->rotateCounterclockwise();
 	}
