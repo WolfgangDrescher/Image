@@ -69,13 +69,16 @@ class Image {
 	
 	// Sets the current stage image to the passed filename
 	public function loadImage() {
-		if($gis = getimagesize($this->filename)) {
+		if($gis = getimagesize($this->filename, $info)) {
 			$this->data['width'] = $gis[0];
 			$this->data['height'] = $gis[1];
 			$this->data['type'] = $gis[2];
 			$this->data['mime'] = $gis['mime'];
 			$this->data['channels'] = $gis['channels'];
 			$this->data['bits'] = $gis['bits'];
+			$this->data = array_merge($this->data, exif_read_data($this->filename, 0, true));
+			$this->data['exif'] = exif_read_data($this->filename);
+			// $this->data['info'] = $info; // iptcparse()
 			switch($this->data['type']) {
 				case 1: $icf = 'imagecreatefromgif'; break;
 				case 3: $icf = 'imagecreatefrompng'; break;
