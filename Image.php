@@ -4,7 +4,7 @@
 ---
 Image.php
 Wolfgang Drescher - wolfgangdrescher.ch
-This class allows you to manipulate (e.g. resizing and rotating for thumbnails) output or saving images.
+This class allows you to manipulate (e.g. resizing and rotating for thumbnails) output or saving images with the GD library.
 ...
 */
 
@@ -17,28 +17,31 @@ class Image {
 	public static $chmod = 0755;
 	
 	private $error = false; // Boolean value whether an error occurred or not
-	private $file = null; // Path to the image file
+	private $filename = null; // Path to the image file
 	private $img = null; // Stage image where all manipulations will be set to
 	private $data = array(); // Array with informations about the file
 	
 	// Returns new self as an object to enable method chaining in one line
-	public static function init($file) {
-		return new self($file);
+	public static function init($filename) {
+		return new self($filename);
 	}
 	
 	// Checks filename and prepares image stage for manipulations
-	public function __construct($file) {
+	public function __construct($filename) {
 		try {
-			if(file_exists($file) AND is_file($file)) {
-				$this->file = $file;
+			if(file_exists($filename) AND is_file($filename)) {
+				$this->filename = $filename;
 				$this->loadImage();
 			} else {
-				throw new ImageException('File `' . $file . '` does not exist.');
+				throw new ImageException('File `' . $filename . '` does not exist.');
 			}
 		} catch (ImageException $e) {
 			$this->error = true;
 			if(self::$throwExceptions === true) {
-				echo '<div class="alert alert-danger"><span class="glyphicon glyphicon-warning-sign fa fa-bug fa-spin"></span> '.htmlentities($e->getMessage()).'</div>';
+				echo '<div class="alert alert-danger">';
+				echo '<span class="glyphicon glyphicon-warning-sign fa fa-bug fa-spin"></span> ';
+				echo htmlentities($e->getMessage());
+				echo '</div>';
 			}
 		}
 	}
@@ -66,7 +69,7 @@ class Image {
 	
 	// Sets the current stage image to the passed filename
 	public function loadImage() {
-		if($gis = getimagesize($this->file)) {
+		if($gis = getimagesize($this->filename)) {
 			$this->data['width'] = $gis[0];
 			$this->data['height'] = $gis[1];
 			$this->data['type'] = $gis[2];
@@ -79,9 +82,9 @@ class Image {
 				case 2: default: $icf = 'imagecreatefromjpeg'; break;
 			}
 			ini_set('memory_limit', '128M');
-			$this->img = $icf($this->file);
+			$this->img = $icf($this->filename);
 		} else {
-			throw new ImageException('File `' . $this->file . '` is not an image.');
+			throw new ImageException('File `' . $this->filename . '` is not an image.');
 		}
 		return $this;
 	}
@@ -243,13 +246,13 @@ class Image {
 		return $this->resize($width, $height, 0, 0, $width, $height);
 	}
 	
-	// Rotates stage image by the passed degree value
+	// Rotates stage image by the passed angle
 	// The stage image itself will keep the size after rotating but a background will append
 	// which means the image sizes will grow to keep its rectangular shape 
-	public function rotate($degrees, $bg = array(0,0,0)) {
+	public function rotate($angle, $bg = array(0,0,0)) {
 		if($this->isError()) return false;
-		$degrees = $degrees * (-1);
-		$this->img = imagerotate($this->img, $degrees, imagecolorallocate($this->img, $bg[0], $bg[1], $bg[2]));
+		$angle = $angle * (-1);
+		$this->img = imagerotate($this->img, $angle, imagecolorallocate($this->img, $bg[0], $bg[1], $bg[2]));
 		return $this;
 	}
 	
