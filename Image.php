@@ -79,10 +79,12 @@ class Image {
 			$this->data['height'] = $gis[1];
 			$this->data['type'] = $gis[2];
 			$this->data['mime'] = $gis['mime'];
-			$this->data['channels'] = $gis['channels'];
-			$this->data['bits'] = $gis['bits'];
-			$this->data = array_merge($this->data, exif_read_data($this->filename, 0, true));
-			$this->data['exif'] = exif_read_data($this->filename);
+			$this->data['channels'] = isset($gis['channels']) ? $gis['channels'] : null;
+			$this->data['bits'] = isset($gis['bits']) ? $gis['bits'] : null;
+			if($this->data['type'] == self::JPG) {
+				$this->data = array_merge($this->data, exif_read_data($this->filename, 0, true));
+				$this->data['exif'] = exif_read_data($this->filename);
+			}
 			// $this->data['info'] = $info; // iptcparse()
 			switch($this->data['type']) {
 				case self::GIF: $icf = 'imagecreatefromgif'; break;
