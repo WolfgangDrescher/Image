@@ -21,6 +21,11 @@ class Image {
 	private $img = null; // Stage image where all manipulations will be set to
 	private $data = array(); // Array with informations about the file
 	
+	const GIF = IMAGETYPE_GIF; // 1
+	const JPG = IMAGETYPE_JPEG; // 2
+	const JPEG = self::JPG; // 2
+	const PNG = IMAGETYPE_PNG; // 3
+	
 	// Returns new self as an object to enable method chaining in one line
 	public static function init($filename) {
 		return new self($filename);
@@ -80,9 +85,9 @@ class Image {
 			$this->data['exif'] = exif_read_data($this->filename);
 			// $this->data['info'] = $info; // iptcparse()
 			switch($this->data['type']) {
-				case 1: $icf = 'imagecreatefromgif'; break;
-				case 3: $icf = 'imagecreatefrompng'; break;
-				case 2: default: $icf = 'imagecreatefromjpeg'; break;
+				case self::GIF: $icf = 'imagecreatefromgif'; break;
+				case self::PNG: $icf = 'imagecreatefrompng'; break;
+				case self::JPG: default: $icf = 'imagecreatefromjpeg'; break;
 			}
 			ini_set('memory_limit', '128M');
 			$this->img = $icf($this->filename);
