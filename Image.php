@@ -82,7 +82,7 @@ class Image {
 			$this->data['mime'] = $gis['mime'];
 			$this->data['channels'] = isset($gis['channels']) ? $gis['channels'] : null;
 			$this->data['bits'] = isset($gis['bits']) ? $gis['bits'] : null;
-			if($this->data['type'] == self::JPG) {
+			if($this->getData('type') == self::JPG) {
 				$this->data = array_merge($this->data, exif_read_data($this->filename, 0, true));
 				$this->data['exif'] = exif_read_data($this->filename);
 			}
