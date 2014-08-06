@@ -15,6 +15,7 @@ class Image {
 	// Public variables for class settings
 	public static $throwExceptions = true;
 	public static $chmod = 0755;
+	public static $addFileExtension = false;
 	
 	private $error = false; // Boolean value whether an error occurred or not
 	private $filename = null; // Path to the image file
@@ -99,6 +100,21 @@ class Image {
 		return $this;
 	}
 	
+	// Returns the save path and adds the file extension if needed
+	private function parseSavePath($path, $type = null) {
+		return self::$addFileExtension === true ? (
+			mb_substr($path, -strlen($this->getFileExtension($type))) === $this->getFileExtension($type) ?
+				$path : $path . $this->getFileExtension($type)
+		) : $path;
+	}
+	
+	// Returns the file extension of image $type or $this->getData('type')
+	private function getFileExtension($type = null) {
+		return mb_strtolower(strtr(image_type_to_extension($type === null ? $this->getData('type') : $type, true), array(
+			'.jpeg' => '.jpg' // replace .jpeg with .jpg in file extension
+		)));
+	}
+	
 	// Returns the width of the current stage image
 	public function getWidth() {
 		return $this->isError() ? false : imagesx($this->img);
@@ -147,8 +163,8 @@ class Image {
 	// Saves the stage image as JPG file
 	public function saveJPG($path, $quality = 100) {
 		if($this->isError()) return false;
-		@imagejpeg($this->img, $path, $quality);
-		chmod($path, self::$chmod);
+		@imagejpeg($this->img, $this->parseSavePath($path, self::JPG), $quality);
+		chmod($this->parseSavePath($path, self::JPG), self::$chmod);
 		return $this;
 	}
 	
@@ -156,16 +172,16 @@ class Image {
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
 		imagesavealpha($this->img, true);
-		@imagepng($this->img, $path, $compression);
-		chmod($path, self::$chmod);
+		@imagepng($this->img, $this->parseSavePath($path, self::PNG), $compression);
+		chmod($this->parseSavePath($path, self::PNG), self::$chmod);
 		return $this;
 	}
 	
 	// Saves the stage image as GIF file
 	public function saveGIF($path) {
 		if($this->isError()) return false;
-		@imagegif($this->img, $path);
-		chmod($path, self::$chmod);
+		@imagegif($this->img, $this->parseSavePath($path, self::GIF));
+		chmod($this->parseSavePath($path, self::GIF), self::$chmod);
 		return $this;
 	}
 	
