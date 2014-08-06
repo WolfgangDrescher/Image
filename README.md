@@ -41,7 +41,7 @@ Include `Image.php` in your config PHP file. You can make the following configur
 
 Remember always to put a leading zero when you set the access rights with `Image::$chmod` so PHP can interpret the passed mode as an octal number.
 Note that the default value of `Image::$addFileExtension` is `false` to avoid problems when you add the filename into a database or if you continue using it in your code after saving the image.
-I recommend setting `Query::$throwExceptions` to `false` in a productive environment.
+I recommend setting `Image::$throwExceptions` to `false` in a productive environment.
 
 Image.php
 ---------
