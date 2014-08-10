@@ -65,7 +65,20 @@ class Image {
 	
 	// Enables public access to the data detected with getimagesize()
 	public function getData($key = null) {
-		return isset($this->data[$key]) ? $this->data[$key] : $this->data;
+		if(func_num_args()) {
+			$data = $this->getData();
+			foreach(func_get_args() as $key => $arg) {
+				if(isset($data[$arg])) {
+					$data = $data[$arg];
+					if($key + 1 >= func_num_args()) {
+						return $data;
+					}
+				} else {
+					return null;
+				}
+			}
+		}
+		return $this->data;
 	}
 	
 	// Checks if an error occurred
