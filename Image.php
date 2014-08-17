@@ -16,6 +16,7 @@ class Image {
 	public static $throwExceptions = true;
 	public static $chmod = 0755;
 	public static $addFileExtension = false;
+	public static $shrinkOnly = true;
 	
 	private $error = false; // Boolean value whether an error occurred or not
 	private $filename = null; // Path to the image file
@@ -198,17 +199,42 @@ class Image {
 		return $this;
 	}
 	
+	// Parse image sizes to the biggest size possible without enlarging the source
+	private function parseSize(&$width, &$height, &$dstX, &$dstY, &$dstWidth, &$dstHeight) {
+		if(self::$shrinkOnly === true) {
+			if($dstWidth > $this->getWidth()) {
+				$c = $this->getWidth() / $dstWidth;
+				$dstWidth = $this->getWidth();
+				$dstHeight *= $c;
+				$width *= $c;
+				$height *= $c;
+				$dstX *= $c;
+				$dstY *= $c;
+			}
+			if($dstHeight > $this->getHeight()) {
+				$c = $this->getHeight() / $dstHeight;
+				$dstHeight = $this->getHeight();
+				$dstWidth *= $c;
+				$width *= $c;
+				$height *= $c;
+				$dstX *= $c;
+				$dstY *= $c;
+			}
+		}
+	}
+	
 	// Resizes stage image to the passed size arguments
-	private function resize($w, $h, $tmpX, $tmpY, $tmpW, $tmpH, $bg = array()) {
+	private function resize($width, $height, $dstX, $dstY, $dstWidth, $dstHeight, $bg = array()) {
 		if($this->isError()) return false;
-		$tmp = imagecreatetruecolor($w, $h);
+		$this->parseSize($width, $height, $dstX, $dstY, $dstWidth, $dstHeight);
+		$tmp = imagecreatetruecolor($width, $height);
 		$bg = array_values($bg);
 		if(count($bg) >= 3) {
 			$num = isset($bg[3]) ? ($bg[3] > 1 ? $bg[3] / 100 : $bg[3]) : 1;
 			$alpha = max(0, min(127, intval(floatval($num) * (-127) + 127)));
 			imagefill($tmp, 0, 0, imagecolorallocatealpha($tmp, $bg[0], $bg[1], $bg[2], $alpha));
 		}
-		imagecopyresampled($tmp, $this->img, $tmpX, $tmpY, 0, 0, $tmpW, $tmpH, $this->getWidth(), $this->getHeight());
+		imagecopyresampled($tmp, $this->img, $dstX, $dstY, 0, 0, $dstWidth, $dstHeight, $this->getWidth(), $this->getHeight());
 		$this->img = $tmp;
 		return $this;
 	}

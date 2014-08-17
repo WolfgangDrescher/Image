@@ -38,6 +38,7 @@ Include `Image.php` in your config PHP file. You can make the following configur
 	Image::$throwExceptions = false; // (default: true) disable error messages
 	Image::$chmod = 0777; // (default: 0755) set the image access rights for saving
 	Image::$addFileExtension = true; // (default: false) add file extension if forgotten in save method
+	Image::$shrinkOnly = false; // (default: true) allow class to enlarge images bigger than the source
 
 Remember always to put a leading zero when you set the access rights with `Image::$chmod` so PHP can interpret the passed mode as an octal number.
 Note that the default value of `Image::$addFileExtension` is `false` to avoid problems when you add the filename into a database or if you continue using it in your code after saving the image.
@@ -62,12 +63,13 @@ When you need the current width or height of the image you can use following met
 	echo $currentWidth = $img->getWidth();
 	echo $currentHeight = $img->getHeight();
 
-If you need informations about the original file use the `->getData()` method. If no argument is passed the method returns an array with all data available. Pass `exif` as agrument go get an array with all Exif data or pass a section name (`COMPUTED`, `ANY_TAG`, `IFD0`, `THUMBNAIL`, `COMMENT`, `EXIF`) to get specific Exif data.
+If you need informations about the original file use the `->getData()` method. If no argument is passed the method returns an array with all data available. Pass `exif` as agrument go get an array with all Exif data or pass a section name (`COMPUTED`, `ANY_TAG`, `IFD0`, `THUMBNAIL`, `COMMENT`, `EXIF`) to get specific Exif data. Pass multiple arguments to get deep access to the data array. The method will return `null` if the array element could not be found.
 
 	print_r($img->getData()); // prints an array with all available data
 	echo $mime = $img->getData('mime');
-	echo $width = $img->getData('width');
 	echo $copyright = $img->getData('IFD0')['Copyright']; // PHP 5.4
+	echo $description = $img->getData('IFD0', 'ImageDescription');
+	echo $copyright = $img->getData('exif', 'COMPUTED', 'Copyright');
 	print_r($img->getData('exif'));
 
 Resize an image with `->resizeDeform($w, $h)` to force the image to the passed width and height. The method will not keep the aspect ratio and will skew the image.
