@@ -113,6 +113,9 @@ You can output an image directly as JPG, PNG or GIF. Note that `->output...()` s
 	$img->outputJPG(80); // pass the quality (0-100) as argument, default: 100. In most cases 85 should be more than enough. A better quality will make a bigger file size, but not always cause better viewable results
 	$img->outputPNG(1); // pass the compression level from 0 (best, default) to 9 (worst)
 	$img->outputGIF();
+	
+	$img->output($quality); // Output an image in its original type
+	$img->output($quality, Image::GIF);
 
 Or save an image with these methods:
 
@@ -120,6 +123,9 @@ Or save an image with these methods:
 	$img->saveJPG($filename . '.jpg', $quality);
 	$img->savePNG($filename . '.png', $compression);
 	$img->saveGIF($filename . '.gif');
+	
+	$img->save($filename, $quality); // Save an image in its original type
+	$img->save($filename, $quality, Image::PNG);
 
 You can use method chaining to make multiple image manipulations at the same time.
 
