@@ -170,7 +170,7 @@ class Image {
 		if($this->isError()) return false;
 		header('Content-Type: image/png');
 		imagesavealpha($this->img, true);
-		@imagepng($this->img, null, $compression);
+		@imagepng($this->img, null, $compression > 9 ? round(-9 / 100 * $compression + 9) : $compression);
 		return $this;
 	}
 	
@@ -212,7 +212,7 @@ class Image {
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
 		imagesavealpha($this->img, true);
-		@imagepng($this->img, $this->parseSavePath($path, self::PNG), $compression);
+		@imagepng($this->img, $this->parseSavePath($path, self::PNG), $compression > 9 ? round(-9 / 100 * $compression + 9) : $compression);
 		chmod($this->parseSavePath($path, self::PNG), self::$chmod);
 		return $this;
 	}
