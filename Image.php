@@ -28,6 +28,10 @@ class Image {
 	const JPEG = self::JPG; // 2
 	const PNG = IMAGETYPE_PNG; // 3
 	
+	const FlipHorizontal = IMG_FLIP_HORIZONTAL;
+	const FlipVertical = IMG_FLIP_VERTICAL;
+	const FlipBoth = IMG_FLIP_BOTH;
+	
 	// Returns new self as an object to enable method chaining in one line
 	public static function init($filename) {
 		return new self($filename);
@@ -375,6 +379,38 @@ class Image {
 	// Alias for self::rotateCounterclockwise()
 	public function rotateCCw() {
 		return $this->rotateCounterclockwise();
+	}
+	
+	// Flips stage image in the passed direction
+	private function flip($mode) {
+		if($this->isError()) return false;
+		imageflip($this->img, $mode);
+		return $this;
+	}
+	
+	// Flips stage image horizontally
+	public function flipHorizontal() {
+		return $this->flip(self::FlipHorizontal);
+	}
+	
+	// Flips stage image vertically
+	public function flipVertical() {
+		return $this->flip(self::FlipVertical);
+	}
+	
+	// Flips stage image in both directions
+	public function flipBoth() {
+		return $this->flip(self::FlipBoth);
+	}
+	
+	// Alias for self::flipHorizontal()
+	public function flipX() {
+		return $this->flip(self::FlipHorizontal);
+	}
+	
+	// Alias for self::flipVertical()
+	public function flipY() {
+		return $this->flip(self::FlipVertical);
 	}
 	
 }
