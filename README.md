@@ -10,6 +10,7 @@ Features
 
 - Support for JPGs, PNGs and GIFs
 - Resize images with different methods e.g. `->resizeFill(…)`, `->resizeFit(…)`
+- Rotate and flip images
 - Method chaining in one line e.g. `Image::init(…)->resizeFill(…)->saveJPG(…);`
 - Nicely designed error messages with Bootstrap
 
@@ -107,6 +108,8 @@ The method `->rotate($angle, $rgb)` will rotate an image. The image itself will 
 	$img->rotate(45);
 
 There are Shortcuts to rotate an image by 90 degree clockwise or counter clockwise: `->rotateClockwise()`, `->rotateCw()`, `->rotateRight()` and `->rotateCounterClockwise()`, `->rotateCCw()`, `->rotateLeft()`.
+
+The methods `->flipVertical()`, `->flipHorizontal()`, `->flipBoth()` will flip an image.
 
 You can output an image directly as JPG, PNG or GIF. Note that `->output...()` should be the last method you call or chain because it will send the output directly to the browser. Use the following methods:
 
