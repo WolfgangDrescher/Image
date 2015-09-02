@@ -139,6 +139,19 @@ class Image {
 		return $this->isError() ? false : imagesy($this->img);
 	}
 	
+	// Outputs the stage image
+	public function output($quality = 100, $type = null) {
+		$type = $type === null ? $this->getData('type') : $type;
+		if($type === self::JPG) {
+			return $this->outputJPG($quality);
+		} elseif($type === self::PNG) {
+			return $this->outputPNG($quality);
+		} elseif($type === self::GIF) {
+			return $this->outputGIF();
+		}
+		return $this;
+	}
+	
 	// Alias for self::outputJPG()
 	public function outputJPEG() {
 		return call_user_func_array('self::outputJPG', func_get_args());
@@ -166,6 +179,19 @@ class Image {
 		if($this->isError()) return false;
 		header('Content-Type: image/gif');
 		@imagegif($this->img);
+		return $this;
+	}
+	
+	// Saves the stage image as a file
+	public function save($path, $quality = 100, $type = null) {
+		$type = $type === null ? $this->getData('type') : $type;
+		if($type === self::JPG) {
+			return $this->saveJPG($path, $quality);
+		} elseif($type === self::PNG) {
+			return $this->savePNG($path, $quality);
+		} elseif($type === self::GIF) {
+			return $this->saveGIF($path);
+		}
 		return $this;
 	}
 	
