@@ -17,7 +17,7 @@ Features
 Requirements
 ------------
 
-- A server running at least PHP version 5.3 and the GD library installed.
+- A server running at least PHP version 5.5 and the GD library installed.
 - Recommended: error messages are formated with [Bootstrap](http://getbootstrap.com/).
 
 License
