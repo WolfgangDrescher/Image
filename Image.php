@@ -169,6 +169,7 @@ class Image {
 	public function outputPNG($compression = 0) {
 		if($this->isError()) return false;
 		header('Content-Type: image/png');
+		imagealphablending($this->img, false);
 		imagesavealpha($this->img, true);
 		@imagepng($this->img, null, $compression > 9 ? round(-9 / 100 * $compression + 9) : $compression);
 		return $this;
@@ -211,6 +212,7 @@ class Image {
 	// Saves the stage image as PNG file
 	public function savePNG($path, $compression = 0) {
 		if($this->isError()) return false;
+		imagealphablending($this->img, false);
 		imagesavealpha($this->img, true);
 		@imagepng($this->img, $this->parseSavePath($path, self::PNG), $compression > 9 ? round(-9 / 100 * $compression + 9) : $compression);
 		chmod($this->parseSavePath($path, self::PNG), self::$chmod);
