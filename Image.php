@@ -123,7 +123,7 @@ class Image {
 	}
 	
 	// Returns the file extension of image $type or $this->getData('type')
-	private function getFileExtension($type = null) {
+	public function getFileExtension($type = null) {
 		return mb_strtolower(strtr(image_type_to_extension($type === null ? $this->getData('type') : $type, true), array(
 			'.jpeg' => '.jpg' // replace .jpeg with .jpg in file extension
 		)));
