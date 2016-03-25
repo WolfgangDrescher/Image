@@ -344,6 +344,7 @@ class Image {
 	// which means the image sizes will grow to keep its rectangular shape 
 	public function rotate($angle, $bg = array(0,0,0)) {
 		if($this->isError()) return false;
+		if($angle % 360 === 0) return $this;
 		$angle = $angle * (-1);
 		$this->img = imagerotate($this->img, $angle, imagecolorallocate($this->img, $bg[0], $bg[1], $bg[2]));
 		return $this;
