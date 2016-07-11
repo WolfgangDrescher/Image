@@ -256,6 +256,8 @@ class Image {
 		if($this->isError()) return false;
 		$this->parseSize($width, $height, $dstX, $dstY, $dstWidth, $dstHeight);
 		$tmp = imagecreatetruecolor($width, $height);
+		imagealphablending($tmp, false);
+		imagesavealpha($tmp, true);
 		$bg = array_values($bg);
 		if(count($bg) >= 3) {
 			$num = isset($bg[3]) ? ($bg[3] > 1 ? $bg[3] / 100 : $bg[3]) : 1;
